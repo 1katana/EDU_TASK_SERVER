@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/edu_task
+    username: postgres
+    password: "root"
+#  sql:
+#    init:
+#      mode: always
+#      continue-on-error: false
+#      schema-locations: classpath:schema.sql
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+security:
+  jwt:
+    secret: cGl6ZGFzdWthZWJhdHBpemRhc3VrYXN1a2Fra2tra2tra2thYWFhYWFhYWE=
+    access: 1 # 1 час
+    refresh: 30 # 30 дней
+
