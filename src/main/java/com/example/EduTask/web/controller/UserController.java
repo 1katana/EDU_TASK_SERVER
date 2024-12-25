@@ -3,10 +3,7 @@ package com.example.EduTask.web.controller;
 
 import com.example.EduTask.domain.groups.Group;
 import com.example.EduTask.domain.users.User;
-import com.example.EduTask.service.GroupService;
-import com.example.EduTask.service.GroupUserService;
-import com.example.EduTask.service.TaskService;
-import com.example.EduTask.service.UserService;
+import com.example.EduTask.service.*;
 import com.example.EduTask.web.dto.groups.GroupDto;
 import com.example.EduTask.web.dto.tasks.TaskStatusDto;
 import com.example.EduTask.web.dto.users.UserDto;
@@ -32,8 +29,9 @@ public class UserController {
     private final TaskService taskService;
 
     private final GroupUserService groupUserService;
+    private final GroupMapper groupMapper;
 
-//    private final TaskMapper taskMapper;
+    private final TaskStatusMapper taskStatusMapper;
 
 
     @GetMapping("/{id}")
@@ -54,7 +52,7 @@ public class UserController {
     @GetMapping("/{id}/groups")
     public List<GroupDto> getUserGroups(@PathVariable final Long id) {
 
-        return GroupMapper.toDtoList(groupUserService.getGroupsByUserId(id));
+        return groupMapper.toDtoList(groupUserService.getGroupsByUserId(id));
     }
 
     @PutMapping
@@ -69,7 +67,7 @@ public class UserController {
     @GetMapping("/{id}/tasks")
     public List<TaskStatusDto> getUserTasks(@PathVariable final Long id) {
 
-        return TaskStatusMapper.toDtoList(taskService.getTasksByUserId(id));
+        return taskStatusMapper.toDtoList(taskService.getTasksByUserId(id));
     }
 
 

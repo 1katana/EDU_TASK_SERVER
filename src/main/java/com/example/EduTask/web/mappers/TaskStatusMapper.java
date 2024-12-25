@@ -4,19 +4,25 @@ package com.example.EduTask.web.mappers;
 import com.example.EduTask.domain.tasks.Task;
 import com.example.EduTask.domain.tasks.TaskStatus;
 import com.example.EduTask.domain.users.User;
+import com.example.EduTask.service.UserService;
 import com.example.EduTask.web.dto.tasks.TaskDto;
 import com.example.EduTask.web.dto.tasks.TaskStatusDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
+@RequiredArgsConstructor
 public class TaskStatusMapper {
 
-
+    private final TaskMapper taskMapper;
+    private final UserService userService;
 
     // Mapping from TaskStatus to TaskStatusDto
-    public static TaskStatusDto toDto(TaskStatus taskStatus) {
+    public TaskStatusDto toDto(TaskStatus taskStatus) {
         if (taskStatus == null) {
             return null;
         }
@@ -24,11 +30,11 @@ public class TaskStatusMapper {
         TaskStatusDto taskStatusDto = new TaskStatusDto();
         taskStatusDto.setId(taskStatus.getId());
 
-        TaskDto taskDto=TaskMapper.toDto(taskStatus.getTask());
+        TaskDto taskDto=taskMapper.toDto(taskStatus.getTask());
 
         taskStatusDto.setTask(taskDto); // Convert Task to TaskDto
 //        taskStatusDto.getTask().setId(taskStatus.getTask().getId()); // Set Task ID
-        taskStatusDto.setUserId(taskStatus.getUser() != null ? taskStatus.getUser().getId() : null);
+        taskStatusDto.setUserId(taskStatus.getUser().getId());
         taskStatusDto.setStatus(taskStatus.getStatus());
         taskStatusDto.setUpdatedAt(taskStatus.getUpdatedAt());
 
@@ -36,7 +42,7 @@ public class TaskStatusMapper {
     }
 
     // Mapping from TaskStatusDto to TaskStatus
-    public static TaskStatus toEntity(TaskStatusDto taskStatusDto) {
+    public TaskStatus toEntity(TaskStatusDto taskStatusDto) {
         if (taskStatusDto == null) {
             return null;
         }
@@ -44,40 +50,37 @@ public class TaskStatusMapper {
         TaskStatus taskStatus = new TaskStatus();
         taskStatus.setId(taskStatusDto.getId());
 
-        // Convert TaskDto to Task
-        Task task = TaskMapper.toEntity(taskStatusDto.getTask());
-        taskStatus.setTask(task);
 
-        // Convert User ID to User entity
-        User user = new User();
-        user.setId(taskStatusDto.getUserId());
-        taskStatus.setUser(user);
+        taskStatus.setTask(taskMapper.toEntity(taskStatusDto.getTask()));
+
+
+        taskStatus.setUser(userService.getById(taskStatusDto.getUserId()));
 
         taskStatus.setStatus(taskStatusDto.getStatus());
-        taskStatus.setUpdatedAt(taskStatusDto.getUpdatedAt() != null ? taskStatusDto.getUpdatedAt() : LocalDateTime.now());
+//        taskStatus.setUpdatedAt(taskStatusDto.getUpdatedAt() != null ? taskStatusDto.getUpdatedAt() : LocalDateTime.now());
 
         return taskStatus;
     }
 
     // Mapping from List<TaskStatus> to List<TaskStatusDto>
-    public static List<TaskStatusDto> toDtoList(List<TaskStatus> taskStatuses) {
+    public List<TaskStatusDto> toDtoList(List<TaskStatus> taskStatuses) {
         if (taskStatuses == null) {
             return null;
         }
 
         return taskStatuses.stream()
-                .map(TaskStatusMapper::toDto)
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
     // Mapping from List<TaskStatusDto> to List<TaskStatus>
-    public static List<TaskStatus> toEntityList(List<TaskStatusDto> taskStatusDtos) {
+    public List<TaskStatus> toEntityList(List<TaskStatusDto> taskStatusDtos) {
         if (taskStatusDtos == null) {
             return null;
         }
 
         return taskStatusDtos.stream()
-                .map(TaskStatusMapper::toEntity)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 }

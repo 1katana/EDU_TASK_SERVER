@@ -2,9 +2,14 @@ package com.example.EduTask.web.mappers;
 
 import com.example.EduTask.domain.groups.Group;
 import com.example.EduTask.domain.users.User;
+import com.example.EduTask.service.GroupService;
+import com.example.EduTask.service.UserService;
 import com.example.EduTask.web.dto.groups.GroupDto;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,10 +18,14 @@ import java.util.List;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
+@RequiredArgsConstructor
 public class GroupMapper {
 
+    private final UserService userService;
+
     // Mapping from Group to GroupDto
-    public static GroupDto toDto(Group group) {
+    public GroupDto toDto(Group group) {
         if (group == null) {
             return null;
         }
@@ -31,7 +40,7 @@ public class GroupMapper {
     }
 
     // Mapping from GroupDto to Group
-    public static Group toEntity(GroupDto groupDto) {
+    public Group toEntity(GroupDto groupDto) {
         if (groupDto == null) {
             return null;
         }
@@ -40,35 +49,33 @@ public class GroupMapper {
         group.setId(groupDto.getId());
         group.setName(groupDto.getName());
 
-        // Assuming you have a User service or some way to get the User by creatorId
-        User creator = new User();
-        creator.setId(groupDto.getCreatorId());  // You can fetch the creator from the database based on the creatorId
-        group.setCreator(creator);
 
-        group.setCreatedAt(groupDto.getCreatedAt() != null ? groupDto.getCreatedAt() : LocalDateTime.now());
+        group.setCreator(userService.getById(groupDto.getCreatorId()));
+
+//        group.setCreatedAt(groupDto.getCreatedAt() != null ? groupDto.getCreatedAt() : LocalDateTime.now());
 
         return group;
     }
 
     // Mapping from List<Group> to List<GroupDto>
-    public static List<GroupDto> toDtoList(List<Group> groups) {
+    public List<GroupDto> toDtoList(List<Group> groups) {
         if (groups == null) {
             return null;
         }
 
         return groups.stream()
-                .map(GroupMapper::toDto)
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
     // Mapping from List<GroupDto> to List<Group>
-    public static List<Group> toEntityList(List<GroupDto> groupDtos) {
+    public List<Group> toEntityList(List<GroupDto> groupDtos) {
         if (groupDtos == null) {
             return null;
         }
 
         return groupDtos.stream()
-                .map(GroupMapper::toEntity)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 }

@@ -9,6 +9,7 @@ import com.example.EduTask.service.GroupService;
 import com.example.EduTask.service.GroupUserService;
 import com.example.EduTask.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 @Transactional(readOnly = true)
 public class GroupUserServiceImpl implements GroupUserService {
 

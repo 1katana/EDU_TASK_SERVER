@@ -34,6 +34,6 @@ public class TaskStatus {
     @Enumerated(EnumType.STRING)
     private Status status = Status.NEW;
 
-    @Column(name = "updated_at", nullable = false, updatable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

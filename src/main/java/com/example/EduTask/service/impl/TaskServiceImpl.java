@@ -10,9 +10,7 @@ import com.example.EduTask.repository.TaskStatusesRepository;
 import com.example.EduTask.service.GroupService;
 import com.example.EduTask.service.GroupUserService;
 import com.example.EduTask.service.TaskService;
-import com.example.EduTask.service.TaskStatusService;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.control.MappingControl;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +29,10 @@ public class TaskServiceImpl implements TaskService {
     private final GroupUserService groupUserService;
     private final TaskStatusesRepository taskStatusesRepository;
 
+
     @Transactional
     @Override
-    public Task createTask(final Task task) {
+    public TaskStatus createTask(final Task task) {
 
         // Получаем список пользователей, входящих в группу
         List<User> users = groupUserService.getUsersInGroup(task.getGroup().getId());
@@ -57,19 +56,21 @@ public class TaskServiceImpl implements TaskService {
         taskStatusesRepository.saveAllAndFlush(taskStatuses);
 
         // Возвращаем сохранённую задачу
-        return task;
+        return getTaskStatusByTaskAndUser(task.getId(), task.getCreator().getId());
     }
+
 
     @Override
     public Task getTaskById(final Long id) {
-        return taskRepository.findById(id).orElseThrow(()-> new ResourceNotFoundExceptions("Task not found."));
+        return taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundExceptions("Task not found."));
     }
+
 
     @Transactional
     @Override
-    public Task updateTask(final  Task task) {
+    public TaskStatus updateTask(final Task task) {
 
-        Task existing=getTaskById(task.getId());
+        Task existing = getTaskById(task.getId());
 
         existing.setTitle(task.getTitle());
 
@@ -79,24 +80,67 @@ public class TaskServiceImpl implements TaskService {
 
         taskRepository.save(existing);
 
-        return task;
+        List<TaskStatus> taskStatuses = getTaskStatusesByTaskId(task.getId());
+
+        taskStatuses.forEach(taskStatus -> {
+            taskStatus.setStatus(taskStatus.getStatus());
+
+            taskStatus.setUpdatedAt(LocalDateTime.now());
+        });
+
+        return null;
     }
+
+    @Transactional
+    @Override
+    public TaskStatus updateTaskStatus(TaskStatus taskStatus) {
+
+
+        TaskStatus existingTaskStatus = getTaskStatusByTaskAndUser(taskStatus.getTask().getId(), taskStatus.getUser().getId());
+
+        existingTaskStatus.setStatus(taskStatus.getStatus());
+
+        existingTaskStatus.setUpdatedAt(LocalDateTime.now());
+
+        return existingTaskStatus;
+    }
+
 
     @Transactional
     @Override
     public void deleteTask(final Long id) {
         taskRepository.deleteById(id);
+
     }
 
 
     @Override
-    public List<Task> getTasksByGroupId(final Long groupId) {
-        return taskRepository.findTasksByGroup(groupId);
+    public List<TaskStatus> getTasksByGroupId(final Long groupId, final Long userId) {
+        // Получаем список задач по groupId
+        List<Task> tasks = taskRepository.findTasksByGroup(groupId);
+
+        // Получаем статусы задач по taskId и userId
+
+        return tasks.stream()
+                .flatMap(task -> taskStatusesRepository.findByTaskIdAndUserId(task.getId(), userId).stream())
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TaskStatus> getTaskStatusesByTaskId(final Long taskId) {
+        return taskStatusesRepository.findByTaskId(taskId);
+    }
+
 
     @Override
     public List<TaskStatus> getTasksByUserId(final Long userId) {
 
         return taskStatusesRepository.findByUserId(userId);
+    }
+
+    @Override
+    public TaskStatus getTaskStatusByTaskAndUser(final Long taskId, final Long userId) {
+        return taskStatusesRepository.findByTaskIdAndUserId(taskId, userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("TaskStatus not found"));
     }
 }
