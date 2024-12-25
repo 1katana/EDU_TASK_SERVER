@@ -11,10 +11,13 @@ import com.example.EduTask.web.dto.tasks.TaskDto;
 import com.example.EduTask.web.dto.tasks.TaskStatusDto;
 
 
+import com.example.EduTask.web.dto.validation.OnCreate;
+import com.example.EduTask.web.dto.validation.OnUpdate;
 import com.example.EduTask.web.mappers.TaskMapper;
 import com.example.EduTask.web.mappers.TaskStatusMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,18 +34,18 @@ public class TaskController {
     private final TaskMapper taskMapper;
     private final TaskStatusMapper taskStatusMapper;
 
-
+    @PreAuthorize("@customSecurityException.canAccessUser(#taskDto.creatorId)")
     @PostMapping("")
-    public TaskStatusDto createTask(@RequestBody TaskDto taskDto) {
+    public TaskStatusDto createTask(@Validated(OnCreate.class) @RequestBody TaskDto taskDto) {
 
         Task task = taskMapper.toEntity(taskDto);
-
 
         return taskStatusMapper.toDto(taskService.createTask(task));
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#taskDto.creatorId)")
     @PutMapping("")
-    public void updateTask(@RequestBody TaskDto taskDto) {
+    public void updateTask(@Validated(OnUpdate.class) @RequestBody TaskDto taskDto) {
 
         Task task = taskMapper.toEntity(taskDto);
 
@@ -50,17 +53,20 @@ public class TaskController {
         taskStatusMapper.toDto(taskService.updateTask(task));
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#taskStatusDto.userId)")
     @PutMapping("/status")
-    public TaskStatusDto updateTaskStatus(@RequestBody TaskStatusDto taskStatusDto) {
+    public TaskStatusDto updateTaskStatus(@Validated(OnUpdate.class) @RequestBody TaskStatusDto taskStatusDto) {
+
         return taskStatusMapper.toDto(taskService.updateTaskStatus(taskStatusMapper.toEntity(taskStatusDto)));
     }
 
+    @PreAuthorize("@customSecurityException.canAccessDeleteTask(#id)")
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
     }
 
-
+    @PreAuthorize("@customSecurityException.canAccessUser(#userId)")
     @GetMapping("/{taskId}/user/{userId}")
     public TaskStatusDto getTaskStatusByTaskAndUser(@PathVariable Long taskId, @PathVariable Long userId) {
         TaskStatus taskStatus = taskService.getTaskStatusByTaskAndUser(taskId, userId);

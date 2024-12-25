@@ -1,5 +1,6 @@
 package com.example.EduTask.service.impl;
 
+import com.example.EduTask.domain.exceptions.ResourceNotFoundExceptions;
 import com.example.EduTask.domain.groups.Group;
 import com.example.EduTask.domain.groups.GroupUserId;
 import com.example.EduTask.domain.groups.GroupUsers;
@@ -62,5 +63,14 @@ public class GroupUserServiceImpl implements GroupUserService {
         User userExisting = userService.getById(userId);
 
         return groupUserRepository.findGroupsByUserId(userId);
+    }
+
+    @Override
+    public Group getGroupByUserIdAndGroupId(Long userId,Long groupId) {
+        User userExisting = userService.getById(userId);
+
+        return groupUserRepository.findGroupByUserIdAndGroupId(userId,groupId).orElseThrow(() ->
+                new ResourceNotFoundExceptions("Group not found.")
+        );
     }
 }

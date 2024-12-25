@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GroupUserRepository extends JpaRepository<GroupUsers, GroupUserId> {
@@ -35,4 +36,8 @@ public interface GroupUserRepository extends JpaRepository<GroupUsers, GroupUser
 
     @Query("SELECT gu.group FROM GroupUsers gu WHERE gu.user.id = :userId")
     List<Group> findGroupsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT gu.group FROM GroupUsers gu WHERE gu.user.id = :userId AND gu.group.id = :groupId")
+    Optional<Group> findGroupByUserIdAndGroupId(@Param("userId") Long userId, @Param("groupId") Long groupId);
+
 }

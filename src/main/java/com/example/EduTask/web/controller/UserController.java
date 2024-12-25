@@ -13,6 +13,7 @@ import com.example.EduTask.web.mappers.GroupMapper;
 import com.example.EduTask.web.mappers.TaskStatusMapper;
 import com.example.EduTask.web.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,8 @@ public class UserController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("@customSecurityException.canAccessUser(#id)")
+
     public UserDto getById(
             @PathVariable final Long id
     ) {
@@ -42,6 +45,7 @@ public class UserController {
         return UserMapper.toDto(userService.getById(id));
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#id)")
     @DeleteMapping("/{id}")
     public void deleteById(
             @PathVariable final Long id
@@ -49,21 +53,34 @@ public class UserController {
         userService.delete(id);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#id)")
     @GetMapping("/{id}/groups")
     public List<GroupDto> getUserGroups(@PathVariable final Long id) {
 
         return groupMapper.toDtoList(groupUserService.getGroupsByUserId(id));
     }
 
+
+    @PreAuthorize("@customSecurityException.canAccessUserAndGroup(#id,#groupId)")
+    @GetMapping("/{id}/group/{groupId}")
+    public GroupDto getGroupByUserIdAndGroupId(@PathVariable final Long id, @PathVariable final Long groupId) {
+
+        return groupMapper.toDto(groupUserService.getGroupByUserIdAndGroupId(id,groupId));
+    }
+
+
+    @PreAuthorize("@customSecurityException.canAccessUser(#userDto.id)")
     @PutMapping
     public UserDto update(
             @Validated(OnUpdate.class) @RequestBody final UserDto userDto
-    ){
+    ) {
         User user = UserMapper.toEntity(userDto);
+
         User updateUser = userService.update(user);
         return UserMapper.toDto(updateUser);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#id)")
     @GetMapping("/{id}/tasks")
     public List<TaskStatusDto> getUserTasks(@PathVariable final Long id) {
 

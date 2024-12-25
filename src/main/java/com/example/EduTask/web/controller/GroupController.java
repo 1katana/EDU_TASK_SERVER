@@ -17,6 +17,7 @@ import com.example.EduTask.web.mappers.TaskStatusMapper;
 import com.example.EduTask.web.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,12 +37,13 @@ public class GroupController {
     private final TaskService taskService;
 
 
+//    //СВой
+//    @GetMapping("/{id}")
+//    public GroupDto getGroupById(@PathVariable final Long id) {
+//        return groupMapper.toDto(groupService.getGroupById(id));
+//    }
 
-    @GetMapping("/{id}")
-    public GroupDto getGroupById(@PathVariable final Long id) {
-        return groupMapper.toDto(groupService.getGroupById(id));
-    }
-
+    @PreAuthorize("@customSecurityException.canAccessUser(#groupDto.creatorId)")
     @PostMapping("")
     public GroupDto createGroup(@Validated(OnCreate.class) @RequestBody GroupDto groupDto) {
         Group group = groupMapper.toEntity(groupDto);
@@ -50,6 +52,7 @@ public class GroupController {
         return groupMapper.toDto(groupNew);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#groupDto.creatorId)")
     @PutMapping("")
     public GroupDto updateGroup(@Validated(OnUpdate.class) @RequestBody GroupDto groupDto) {
         Group group = groupMapper.toEntity(groupDto);
@@ -58,12 +61,14 @@ public class GroupController {
         return groupMapper.toDto(groupNew);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessUser(#userId)")
     @GetMapping("/{groupId}/user/{userId}")
     public List<TaskStatusDto> getTasksByGroupId(@PathVariable Long groupId, @PathVariable Long userId) {
         List<TaskStatus> taskStatuses = taskService.getTasksByGroupId(groupId, userId);
         return taskStatusMapper.toDtoList(taskStatuses);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessGroup(#id)")
     @GetMapping("/{id}/users")
     public List<UserDto> getUsersInGroup(@PathVariable final Long id) {
         // Получаем список пользователей в группе
@@ -73,6 +78,7 @@ public class GroupController {
         return UserMapper.toDtoList(usersInGroup);
     }
 
+    @PreAuthorize("@customSecurityException.canAccessAddUserGroup(#groupId)")
     @PostMapping("/{groupId}/users/{userId}")
     public ResponseEntity<String> addUserToGroup(
             @PathVariable Long groupId,
