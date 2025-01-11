@@ -88,4 +88,11 @@ public class UserController {
     }
 
 
+    @GetMapping("/find/{snippetEmail}")
+    public List<User> findUserBySnippetEmail(@PathVariable final String snippetEmail) {
+
+        return userService.findByEmail(snippetEmail);
+    }
+
+
 }

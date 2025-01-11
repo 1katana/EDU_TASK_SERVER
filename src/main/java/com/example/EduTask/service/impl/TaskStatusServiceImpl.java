@@ -35,6 +35,7 @@ public class TaskStatusServiceImpl implements TaskStatusService {
         taskStatus.setStatus(Status.NEW);
 
         taskStatusesRepository.save(taskStatus);
+        
 
         return taskStatus;
     }

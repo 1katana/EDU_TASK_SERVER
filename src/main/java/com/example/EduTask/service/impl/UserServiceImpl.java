@@ -81,6 +81,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findByEmail(final String snippetEmail) {
-        return List.of();
+        return userRepository.findUserBySnippetEmail(snippetEmail);
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 
 
-//ЕСТЬ ПРОБЛЕМЫ С СОЗДАТЕЛЕМ ГРУППЫ
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
