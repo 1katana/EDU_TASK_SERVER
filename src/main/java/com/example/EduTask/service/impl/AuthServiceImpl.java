@@ -3,6 +3,7 @@ package com.example.EduTask.service.impl;
 import com.example.EduTask.domain.users.User;
 import com.example.EduTask.service.AuthService;
 import com.example.EduTask.service.UserService;
+import com.example.EduTask.web.dto.auth.JwtRefresh;
 import com.example.EduTask.web.dto.auth.JwtRequest;
 import com.example.EduTask.web.dto.auth.JwtResponse;
 import com.example.EduTask.web.sequrity.JwtTokenProvider;
@@ -40,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse refresh(String refreshToken) {
+    public JwtResponse refresh(JwtRefresh refreshToken) {
         return jwtTokenProvider.refreshUserTokens(refreshToken);
     }
 }

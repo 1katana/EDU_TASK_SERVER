@@ -5,22 +5,20 @@ import com.example.EduTask.domain.exceptions.AccessDeniedException;
 import com.example.EduTask.domain.users.User;
 import com.example.EduTask.service.UserService;
 import com.example.EduTask.service.props.JwtProperties;
+import com.example.EduTask.web.dto.auth.JwtRefresh;
 import com.example.EduTask.web.dto.auth.JwtResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
+
 
 
 import javax.crypto.SecretKey;
@@ -77,15 +75,17 @@ public class JwtTokenProvider {
     }
 
 
-    public JwtResponse refreshUserTokens(final String refreshToken) {
+    public JwtResponse refreshUserTokens(final JwtRefresh refreshToken) {
 
         JwtResponse jwtResponse = new JwtResponse();
 
-        if (!isValid(refreshToken)) {
+        String token = refreshToken.getRefreshToken();
+
+        if (!isValid(token)) {
             throw new AccessDeniedException();
         }
 
-        Long userId = Long.valueOf(getId(refreshToken));
+        Long userId = getId(token);
         User user = userService.getById(userId);
 
         jwtResponse.setId(userId);
@@ -103,13 +103,13 @@ public class JwtTokenProvider {
         return claims.getPayload().getExpiration().after(new Date());
     }
 
-    private String getId(final String token) {
+    private Long getId(final String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get("id", String.class);
+                .get("id", Long.class);
     }
 
     private String getEmail(

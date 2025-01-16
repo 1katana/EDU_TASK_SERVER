@@ -4,6 +4,7 @@ package com.example.EduTask.web.controller;
 import com.example.EduTask.domain.users.User;
 import com.example.EduTask.service.AuthService;
 import com.example.EduTask.service.UserService;
+import com.example.EduTask.web.dto.auth.JwtRefresh;
 import com.example.EduTask.web.dto.auth.JwtRequest;
 import com.example.EduTask.web.dto.auth.JwtResponse;
 import com.example.EduTask.web.dto.users.UserDto;
@@ -41,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public JwtResponse refresh(@RequestBody final String refreshToken) {
+    public JwtResponse refresh(@RequestBody final JwtRefresh refreshToken) {
         return authService.refresh(refreshToken);
     }
 }
